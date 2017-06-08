@@ -60,7 +60,7 @@ function create_user_directory() {
     # if dirname failed then exit
     [ "$?" -ne 0 ] && echo "Error parsing parent directory: ${fullDirPath}" && return 1
 
-    local owner="${2:-${installUser:-$(id -un)}}"
+    local owner="${2:-${installUser:-$USER}}"
     local group="${3:-${installUser:-$(id -gn)}}"
 
     [ ! -d "${parentDir}" ] && create_user_directory "${parentDir}" "${owner}" "${group}"
