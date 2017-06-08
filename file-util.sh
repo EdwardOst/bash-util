@@ -41,7 +41,7 @@ function create_user_directory() {
 	        Assumes access to sudo.
 
 	    USAGE:
-	        createUserOwnedDirectory <fullDirPath> [ <owner> [ <group> ] ]
+	        create_user_directory <fullDirPath> [ <owner> [ <group> ] ]
 
 	        parameter: fullDirPath: required
 	        parameter: owner: defaults to installUser config or current user if not defined
