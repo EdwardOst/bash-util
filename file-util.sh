@@ -29,7 +29,7 @@ function create_user_directory() {
 
     if [ "${1}" = "-h" -o "${1}" = "--help" -o "$#" -lt 1 ] ; then
         cat <<-HELPDOC
-	createUserOwnedDirectory
+	create_user_directory
 
 	    DESCRIPTION
 	        Create a user owned directory as sudo in some arbitrary location,
