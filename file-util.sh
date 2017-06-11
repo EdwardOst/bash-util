@@ -66,7 +66,7 @@ function create_user_directory() {
     # todo: use iteration rather than recursion
     [ ! -d "${parentDir}" ] && create_user_directory "${parentDir}" "${owner}" "${group}"
     sudo mkdir -p "${fullDirPath}"
-    chmod g+rx "${fullDirPath}"
+    sudo chmod g+rx "${fullDirPath}"
     sudo chown "${owner}:${group}" "${fullDirPath}"
 
 }
