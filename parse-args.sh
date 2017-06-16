@@ -134,12 +134,13 @@ function parse_args() {
                 shift 2
                 ;;
             *)
-                parsed_command+=( "${param}" )
                 if [ -n "${subcommands[${param}]}" ]; then
                     parsed_command[0]="${subcommands[${param}]}"
                 else
                     parsed_command[0]="${param}"
                 fi
+                ((optind=optind+1))
+                shift 1
                 break
                 ;;
         esac
