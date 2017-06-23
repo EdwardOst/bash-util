@@ -4,9 +4,8 @@ export STRING_UTIL_FLAG=1
 
 
 function trim() {
-    shopt -s extglob
     local -n astring="${1}"
-    astring="${astring/#+( )}"
-    astring="${astring/%+( )}"
+    astring="${astring##[[:space:]]}"
+    astring="${astring%%[[:space:]]}"
 }
 

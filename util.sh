@@ -4,13 +4,6 @@ export UTIL_FLAG=1
 
 
 
-function trim() {
-    shopt -s extglob
-    local -n astring="${1}"
-    astring="${astring/#+( )}"
-    astring="${astring/%+( )}"
-}
-
 #
 # define
 #
@@ -165,7 +158,6 @@ declare -f -t trap_add
 # load/export deals with variables
 # read/write deals with property files
 
-export -f trim
 export -f define
 export -f debugLog
 export -f debugVar
