@@ -41,12 +41,11 @@ function create_user_directory() {
 	        Assumes access to sudo.
 
 	    USAGE:
-	        create_user_directory <fullDirPath> [ <owner> [ <group> [ <permission> ] ] ]
+	        create_user_directory <fullDirPath> [ <owner> [ <group> ] ]
 
 	        parameter: fullDirPath: required
 	        parameter: owner: defaults to installUser config or current user if not defined
 	        parameter: group: defaults to installGroup config or current group if not defined
-                parameter: permission: permissions value defaults to 750
 
 	HELPDOC
         return 1
@@ -54,31 +53,20 @@ function create_user_directory() {
 
     local fullDirPath="${1}"
 
-    [ -z "${fullDirPath}" ] && echo "ERROR: invalid file path: ${fullDirPath}" && return 1
+    [ -z "${fullDirPath}" ] && echo "Invalid file path: ${fullDirPath}" && return 1
 
     local parentDir=$(dirname "${fullDirPath}")
 
     # if dirname failed then exit
-    [ "$?" -ne 0 ] && echo "ERROR: error parsing parent directory: ${fullDirPath}" && return 1
+    [ "$?" -ne 0 ] && echo "Error parsing parent directory: ${fullDirPath}" && return 1
 
     local owner="${2:-${installUser:-$USER}}"
-    trim owner
-    [ -z "${owner}" ] && echo "ERROR: owner argument is empty or blank" && return 1
-    ! user_exists "${owner}" && echo "ERROR: owner ${owner} does not exist" && return 1
-
     local group="${3:-${installUser:-$(id -gn)}}"
-    trim group
-    [ -z "${group}" ] && echo "ERROR: group argument is empty or blank" && return 1
-    ! group_exists "${group}" && echo "ERROR: group ${group} does not exist" && return 1
-
-    local permission="${4:-750}"
-    trim permission
-    [ -z "${permission}" ] && echo "ERROR: permission argument is empty or blank" && return 1
 
     # todo: use iteration rather than recursion
     [ ! -d "${parentDir}" ] && create_user_directory "${parentDir}" "${owner}" "${group}"
     sudo mkdir -p "${fullDirPath}"
-    sudo chmod "${permission}" "${fullDirPath}"
+    sudo chmod g+rx "${fullDirPath}"
     sudo chown "${owner}:${group}" "${fullDirPath}"
 
 }
