@@ -26,53 +26,60 @@ define(){ IFS='\n' read -r -d '' "${1}" || true; }
 
 
 
-# echo message only if DEBUG_LOG variable is set
+# echo message to stderr if DEBUG_LOG variable is set
 
 function debugLog() { 
-    if [ -n "${DEBUG_LOG}" ] ; then
-        cat <<< "${FUNCNAME[*]}: ${@}" 1>&2
-    fi
+    [ -n "${DEBUG_LOG}" ] && echo "${FUNCNAME[*]}: ${@}" 1>&2
+    return 0
 }
 
-
-# echo message to log
-
-function infoLog() { 
-    cat <<< "${FUNCNAME[*]}: ${@}" 1>&2
-}
-
-
-# echo a variable if DEBUG_LOG is set, pass variable name without $ as arg
+# echo a variable to sterr if DEBUG_LOG is set, pass variable name without $ as arg
 
 function debugVar() {
+    [ -n "${DEBUG_LOG}" ] && echo "${FUNCNAME[*]}: ${1}=${!1}" 1>&2
+    return 0
+}
+
+# print the current call stack to stderr if DEBUG_LOG is set
+
+function debugStack() {
     if [ -n "${DEBUG_LOG}" ] ; then
-        cat <<< "${FUNCNAME[*]}: ${1}=${!1}" 1>&2
+        local args
+        [ "${#}" -gt 0 ] && args=": $@"
+        echo "debug: ${FUNCNAME[*]}${args}" 1>&2
     fi
 }
 
+
+# echo message to stderr
+
+function infoLog() { 
+    [ -n "${INFO_LOG}" ] && echo "${FUNCNAME[*]}: ${@}" 1>&2
+    return 0
+}
 
 # echo a variable to the log, pass variable name without $ as arg
 
 function infoVar() {
-    cat <<< "${FUNCNAME[*]}: ${1}=${!1}" 1>&2
+    [ -n "${INFO_LOG}" ] && echo "${FUNCNAME[*]}: ${1}=${!1}" 1>&2
+    return 0
 }
-
-
-# print the current call stack to stderr
-
-function debugStack() {
-	if [ -n "${DEBUG_LOG}" ] ; then
-		[ "${#}" -gt 0 ] && __tag=": $@"
-		cat <<< "debug: ${FUNCNAME[*]}${__tag}" 1>&2
-	fi
-}
-
 
 # print the current call stack
 
 function infoStack() {
-    [ "${#}" -gt 0 ] && __tag=": $@"
-    cat <<< "${FUNCNAME[*]}${__tag}" 1>&2
+    if [ -n "${INFO_LOG}" ] ; then
+        local args
+        [ "${#}" -gt 0 ] && args=": $@"
+        echo "${FUNCNAME[*]}${args}" 1>&2
+    fi
+}
+
+
+# echo message to stderr
+
+function errorMessage() { 
+    echo "$0: ${FUNCNAME[*]}: ${@}" 1>&2
 }
 
 

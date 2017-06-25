@@ -25,6 +25,34 @@ create_temp_dir() {
 }
 
 
+function file_exists() {
+
+    local usage="usage: file_exists <filename>"
+    [ "${#}" -lt 1 ] && echo -e "${usage}\n\nERROR: missing filename argument" 1>&2 && return 1
+    local filename="${1}"
+    trim filename
+    [ -z "${filename}" ] && echo -e "${usage}\n\nERROR: empty or blank filename argument" 1>&2 && return 1
+
+    [ ! -f "${filename}" ] && return 1
+
+    return 0
+}
+
+
+function dir_exists() {
+
+    local usage="usage: dir_exists <directory>"
+    [ "${#}" -lt 1 ] && echo -e "${usage}\n\nERROR: missing directory argument" 1>&2 && return 1
+    local dir="${1}"
+    trim dir
+    [ -z "${dir}" ] && echo -e "${usage}\n\nERROR: empty or blank directory argument" 1>&2 && return 1
+
+    [ ! -d "${dir}" ] && return 1
+
+    return 0
+}
+
+
 function create_user_directory() {
 
     if [ "${1}" = "-h" -o "${1}" = "--help" -o "$#" -lt 1 ] ; then

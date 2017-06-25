@@ -153,17 +153,17 @@ function parse_args() {
 function parse_args_usage() {
     echo "usage: ${FUNCNAME[2]} [options...] [ subcommand ] ${args[@]}"
 
-    echo "arguments"
+    echo "arguments:"
     for arg in "${args[@]}"; do
         echo "    ${arg}: ${descriptions[${arg}]}"
     done
 
-    echo "options"
+    echo "options:"
     for option in "${!options[@]}"; do
         echo "    ${option}: ${descriptions[${option}]}"
     done
 
-    echo "*** subcommands: ${subcommands[@]} ***"
+    echo "subcommands:"
     for subcommand in "${!subcommands[@]}"; do
         echo "    ${subcommand}: ${subcommands[${subcommand}]}: ${descriptions[${subcommand}]}"
     done
