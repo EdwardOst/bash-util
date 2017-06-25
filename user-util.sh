@@ -34,14 +34,17 @@ function group_exists() {
 }
 
 function group_members() {
-    [ "${#}" -lt 2 ] && echo "ERROR: usage: group_members <group_name> <member_list_ref>" && return 1
+    local usage="usage: group_members <group_name> <member_list_ref>"
+    [ "${#}" -lt 2 ] && echo -e "${usage}\nERROR: too few arguments" && return 1
     local group_name="${1}"
     trim group_name
-    [ -z "${group_name}" ] && echo -e "ERROR: usage: group_members <group_name>\nempty group_name argument" && return 1
+    [ -z "${group_name}" ] && echo -e "${usage}\nERROR: empty group_name argument" && return 1
 
-    local -n member_list="${2}"
+    local trim member_list_ref="${2}"
+    trim member_list_ref
+    [ -z "${member_list_ref}" ] && echo -e "${usage}\nERROR: empty member_list_ref argument" && return 1
+    local -n member_list="${member_list_ref}"
 
-#    member_list=$(getent group | grep "^${group_name}:" | cut -d: -f4)
     local members=$(getent group | grep "^${group_name}:" | cut -d: -f4)
     IFS=', ' read -r -a member_list <<< "${members}"
 }
