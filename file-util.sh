@@ -82,7 +82,7 @@ function create_user_directory() {
 
     local fullDirPath="${1}"
 
-    dir_exists fullDirPath && return 0
+    dir_exists "${fullDirPath}" && return 0
 
     [ -z "${fullDirPath}" ] && echo "ERROR: invalid file path: ${fullDirPath}" && return 1
 
