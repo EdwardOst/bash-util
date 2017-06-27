@@ -88,11 +88,8 @@ function load_context() {
 # write all variables starting with a prefix to an associative array
 # removing the prefix from the key in the process
 #
-# usage:
-#     export_dictionary context_array prefix [separator]]
-#
 function export_dictionary() {
-    [ "${#}" -lt 2 ] && echo "usage: export_dictionary <context_array> <prefix> [separator]" && exit 1
+    [ "${#}" -lt 2 ] && echo "usage: export_dictionary <context_array_ref> <prefix> [ <separator> ]" && exit 1
 
     local -n context_array="${1}"
     local prefix="${2}"
@@ -127,10 +124,8 @@ function export_context() {
 }
 
 
-# read a line from a property file into an associative array, applying an operator to transform the key
-#
-# usage:
-#     parse_property_file <property_key_value_string> <properties_array> <operator> <prefix>
+# utility function used by read_dictionary to parse a line from a property file into an
+# associative array, applying an operator to transform the key
 #
 function parse_property_file() {
     [ "${#}" -lt 4 ] && echo "usage: parse_property_file <property_key_value_string> <properties_array> <operator> <prefix>" && exit 1
@@ -151,9 +146,6 @@ function parse_property_file() {
 
 # read a property file into an associative array
 # optionally add/remove a prefix by starting prefix with +/-
-#
-# usage:
-#     read_dictionary <properties_file> <properties_array> [prefix [separator]]
 #
 function read_dictionary() {
     [ "${#}" -lt 2 ] && echo "usage: read_dictionary <properties_file> <properties_array> [prefix [separator]]" && exit 1
@@ -184,12 +176,8 @@ function read_dictionary() {
 
 # read property file into context,
 # context name is the name of the calling function appended with _context
-# prefix each key with the context name
 # property file defaults to context name
 # by default neither properties nor context keys have prefixes
-#
-# usage:
-#     read_context [property_file]
 #
 function read_context() {
     local -r properties_file="${1:-${FUNCNAME[1]}.properties}"
