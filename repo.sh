@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -u
+
 [ "${REPO_FLAG:-0}" -gt 0 ] && return 0
 
 export REPO_FLAG=1
@@ -64,7 +68,7 @@ function download_parallel() {
     [ -n "${_password}" ] && _password_arg="--http-password=${_password}"
 
 #    wget "${DOWNLOAD_LIST_OPTIONS}" "${_userid_arg}" "${_password_arg}" -P "${_targetDir}" -i "${_manifestFile}"
-    cat ${_manifestFile} | parallel --no-notice wget "${DOWNLOAD_LIST_OPTIONS}" "${_userid_arg}" "${_password_arg}" -P "${_targetDir}" {}
+    parallel --no-notice wget "${DOWNLOAD_LIST_OPTIONS}" "${_userid_arg}" "${_password_arg}" -P "${_targetDir}" {} < "${_manifestFile}"
 }
 
 
@@ -73,7 +77,7 @@ function checksum() {
 
     local _targetDir=${1}
 
-    (cd ${_targetDir}; ls *.MD5 | xargs -r md5sum -c )
+    (cd "${_targetDir}"; ls ./*.MD5 | xargs -r md5sum -c )
 }
 
 export -f download_file

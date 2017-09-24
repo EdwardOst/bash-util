@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -u
+
 [ "${FILE_UTIL_FLAG:-0}" -gt 0 ] && return 0
 
 export FILE_UTIL_FLAG=1
@@ -86,7 +90,8 @@ function create_user_directory() {
 
     [ -z "${fullDirPath}" ] && echo "ERROR: invalid file path: ${fullDirPath}" && return 1
 
-    local parentDir=$(dirname "${fullDirPath}")
+    local parentDir
+    parentDir=$(dirname "${fullDirPath}")
 
     # if dirname failed then exit
     [ "$?" -ne 0 ] && echo "ERROR: error parsing parent directory: ${fullDirPath}" && return 1

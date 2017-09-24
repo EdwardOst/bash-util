@@ -1,7 +1,8 @@
-set -e
-# set -x
+#!/usr/bin/env bash
 
-[ ${PARSE_ARGS_FLAG:-0} -gt 0 ] && return 0
+set -u
+
+[ "${PARSE_ARGS_FLAG:-0}" -gt 0 ] && return 0
 
 export PARSE_ARGS_FLAG=1
 
@@ -151,7 +152,7 @@ function parse_args() {
 
 
 function parse_args_usage() {
-    echo "usage: ${FUNCNAME[2]} [options...] [ subcommand ] ${args[@]}"
+    echo "usage: ${FUNCNAME[2]} [options...] [ subcommand ] ${args[*]}"
 
     echo "arguments:"
     for arg in "${args[@]}"; do

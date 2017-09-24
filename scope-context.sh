@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 [ "${SCOPE_CONTEXT_FLAG:-0}" -gt 0 ] && return 0
 
 export SCOPE_CONTEXT_FLAG=1

@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -u
+
 [ "${UTIL_FLAG:-0}" -gt 0 ] && return 0
 
 export UTIL_FLAG=1
@@ -21,99 +25,93 @@ export UTIL_FLAG=1
 #	}
 #	EOF
 
-define(){ IFS='\n' read -r -d '' "${1}" || true; }
+define(){ IFS=$'\n' read -r -d '' "${1}" || true; }
 
 
-
-
-# echo message to stderr if DEBUG_LOG variable is set
-
-function debugLog() { 
-    [ -n "${DEBUG_LOG}" ] && echo "${FUNCNAME[*]}: ${@}" 1>&2
+function warningLog() {
+    [ -n "${WARNING_LOG:-}" ] && echo "WARNING: ${*} : ${FUNCNAME[*]:1}" 1>&2
     return 0
 }
 
-# echo a variable to sterr if DEBUG_LOG is set, pass variable name without $ as arg
+
+function debugLog() {
+    [ -n "${DEBUG_LOG:-}" ] && echo "DEBUG: ${FUNCNAME[*]:1} : ${*}" 1>&2
+    return 0
+}
 
 function debugVar() {
-    [ -n "${DEBUG_LOG}" ] && echo "${FUNCNAME[*]}: ${1}=${!1}" 1>&2
+    [ -n "${DEBUG_LOG:-}" ] && echo "DEBUG: ${FUNCNAME[*]:1} : ${1}=${!1}" 1>&2
     return 0
 }
-
-# print the current call stack to stderr if DEBUG_LOG is set
 
 function debugStack() {
-    if [ -n "${DEBUG_LOG}" ] ; then
+    if [ -n "${DEBUG_LOG:-}" ] ; then
         local args
-        [ "${#}" -gt 0 ] && args=": $@"
-        echo "debug: ${FUNCNAME[*]}${args}" 1>&2
+        [ "${#}" -gt 0 ] && args=": ${*}"
+        echo "DEBUG: ${FUNCNAME[*]:1}${args}" 1>&2
     fi
 }
 
 
-# echo message to stderr
-
-function infoLog() { 
-    [ -n "${INFO_LOG}" ] && echo "${FUNCNAME[*]}: ${@}" 1>&2
+function infoLog() {
+    [ -n "${INFO_LOG:-}" ] && echo "INFO: ${*} : ${FUNCNAME[*]:1}" 1>&2
     return 0
 }
-
-# echo a variable to the log, pass variable name without $ as arg
 
 function infoVar() {
-    [ -n "${INFO_LOG}" ] && echo "${FUNCNAME[*]}: ${1}=${!1}" 1>&2
+    [ -n "${INFO_LOG:-}" ] && echo "INFO: ${FUNCNAME[*]:1} : ${1}=${!1}" 1>&2
     return 0
 }
 
-# print the current call stack
-
 function infoStack() {
-    if [ -n "${INFO_LOG}" ] ; then
+    if [ -n "${INFO_LOG:-}" ] ; then
         local args
-        [ "${#}" -gt 0 ] && args=": $@"
-        echo "${FUNCNAME[*]}${args}" 1>&2
+        [ "${#}" -gt 0 ] && args=": ${*}"
+        echo "INFO: ${FUNCNAME[*]:1}${args}" 1>&2
     fi
 }
 
 
-# echo message to stderr
-
 function errorMessage() { 
-    echo "$0: ${FUNCNAME[*]}: ${@}" 1>&2
+    echo "ERROR: $0: ${FUNCNAME[*]:1} : ${*}" 1>&2
 }
 
+function die() {
+    echo "$0: ${FUNCNAME[*]:1} : ${*}" 1>&2
+    exit 111
+}
 
-# send message to stderr
+function try() {
+    while [ -z "${1}" ]; do
+        shift
+    done
+    [ "${#}" -lt 1 ] && die "empty try statement"
 
-function yell() { echo "$0: $*" >&2; }
+    ! "$@" && echo "$0: ${FUNCNAME[*]:1}: cannot execute: ${*}" 1>&2 && exit 111
 
-
-# send message to stderr and exit
-
-function die() { yell "$*"; exit 111; }
-
-
-# exit if the command is not completed successfully
-
-function try() { "$@" || die "cannot $*"; }
-
-
-#
-# set a variable that by convention is the name of the parent function
-# prefixed with "_" and appended with "_result"
-#
-# usage
-#	result _myVar
-#
-
-# function result() { eval _${FUNCNAME[1]}_result='"${!1}"'; }
+    return 0
+}
 
 
 function assign() {
-    [ "${#}" -lt 2 ] && echo "usage: assign <var_name> <value>" && exit 1
-    local -n var="${1}"
-    var="${2}"
-    debugVar "${!var}"
+    local var="${1}"
+    local value="${2}"
+    required var value
+    printf -v "${var}" '%s' "${value}"
+}
+
+
+function required() {
+    local arg
+    local error_message=""
+    for arg in "${@}"; do
+        [ -z "${!arg}" ] && error_message="${error_message} ${arg}"
+    done
+    [ -n "${error_message}" ] \
+        && error_message="missing required arguments:${error_message}" \
+        && echo "$0: ${FUNCNAME[*]:1}: ${error_message}" 1>&2 \
+        && exit 111
+    return 0
 }
 
 
@@ -131,28 +129,29 @@ trap_add() {
         return 2
     fi
 
-    local _trap_command="${1}"
+    local trap_command="${1}"
     shift 1
-    local _trap_signal
-    for _trap_signal in "$@"; do
-        debugVar _trap_signal
+    local trap_signal
+    for trap_signal in "$@"; do
+        debugVar trap_signal
 
         # Get the currently defined traps
-        debugLog $(trap -p "${_trap_signal}" | awk -F"'" '{print "${2}"}')
-        local _existing_trap=$(trap -p "${_trap_signal}" | awk -F"'" '{print "${2}"}')
+        local existing_trap
+        existing_trap=$(trap -p "${trap_signal}" | awk -F"'" '{print "${2}"}')
+        debugVar existing_trap
 
         # Remove single apostrophe formatting wrapper
-        _existing_trap="${_existing_trap#\'}"
-        _existing_trap="${_existing_trap%\'}"
-        debugVar _existing_trap
+        existing_trap="${existing_trap#\'}"
+        existing_trap="${existing_trap%\'}"
+        debugVar existing_trap
 
         # Append new trap to old trap
-        [ -n "${_existing_trap}" ] && _existing_trap="${_existing_trap};"
-        local _new_trap="${_existing_trap}${_trap_command}"
-        debugVar _new_trap
+        [ -n "${existing_trap}" ] && existing_trap="${existing_trap};"
+        local new_trap="${existing_trap}${trap_command}"
+        debugVar new_trap
 
         # Assign the composed trap
-         trap "${_new_trap}" "${_trap_signal}"
+         trap "${new_trap}" "${trap_signal}"
     done
 }
 
@@ -161,9 +160,6 @@ trap_add() {
 # inherit them unless the trace attribute is set
 declare -f -t trap_add
 
-
-# load/export deals with variables
-# read/write deals with property files
 
 export -f define
 export -f debugLog
@@ -175,7 +171,6 @@ export -f infoStack
 export -f yell
 export -f die
 export -f try
-# export -f result
 export -f assign
 export -f trap_add
 

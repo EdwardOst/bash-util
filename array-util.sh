@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -u
+
 [ "${ARRAY_UTIL_FLAG:-0}" -gt 0 ] && return 0
 
 export ARRAY_UTIL_FLAG=1
