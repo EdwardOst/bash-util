@@ -168,7 +168,6 @@ export -f infoLog
 export -f infoVar
 export -f debugStack
 export -f infoStack
-export -f yell
 export -f die
 export -f try
 export -f assign
