@@ -137,7 +137,10 @@ trap_add() {
 
         # Get the currently defined traps
         local existing_trap
-        existing_trap=$(trap -p "${trap_signal}" | awk -F"'" '{print "${2}"}')
+        local current_trap
+        current_trap=$(trap -p "${trap_signal}")
+        debugLog "current trap: ${current_trap}"
+        existing_trap=$( trap -p "${trap_signal}" | awk -F"'" '{ print $2 }' )
         debugVar existing_trap
 
         # Remove single apostrophe formatting wrapper
