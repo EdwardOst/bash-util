@@ -8,23 +8,7 @@ export UTIL_FLAG=1
 
 
 
-#
-# define
-#
-# pretty print define function for reading here documents into a variable
-# then use a here string to access it elsewhere
-#
-# example
-# create a template using here document
-# backtick allows commands or functions to inject derived content
-#
-# define my_template <<-EOF
-# 	function ${my_func}() {
-#	    echo "executing ${my_func}"
-#	    `typeset -p my_dictionary`
-#	}
-#	EOF
-
+# read files or here documents into a variable
 define(){ IFS=$'\n' read -r -d '' "${1}" || true; }
 
 
@@ -33,6 +17,15 @@ function warningLog() {
     return 0
 }
 
+function infoLog() {
+    [ -n "${INFO_LOG:-}" ] && echo "INFO: ${*} : ${FUNCNAME[*]:1}" 1>&2
+    return 0
+}
+
+function infoVar() {
+    [ -n "${INFO_LOG:-}" ] && echo "INFO: ${FUNCNAME[*]:1} : ${1}=${!1}" 1>&2
+    return 0
+}
 
 function debugLog() {
     [ -n "${DEBUG_LOG:-}" ] && echo "DEBUG: ${FUNCNAME[*]:1} : ${*}" 1>&2
@@ -49,25 +42,6 @@ function debugStack() {
         local args
         [ "${#}" -gt 0 ] && args=": ${*}"
         echo "DEBUG: ${FUNCNAME[*]:1}${args}" 1>&2
-    fi
-}
-
-
-function infoLog() {
-    [ -n "${INFO_LOG:-}" ] && echo "INFO: ${*} : ${FUNCNAME[*]:1}" 1>&2
-    return 0
-}
-
-function infoVar() {
-    [ -n "${INFO_LOG:-}" ] && echo "INFO: ${FUNCNAME[*]:1} : ${1}=${!1}" 1>&2
-    return 0
-}
-
-function infoStack() {
-    if [ -n "${INFO_LOG:-}" ] ; then
-        local args
-        [ "${#}" -gt 0 ] && args=": ${*}"
-        echo "INFO: ${FUNCNAME[*]:1}${args}" 1>&2
     fi
 }
 
@@ -105,7 +79,11 @@ function required() {
     local arg
     local error_message=""
     for arg in "${@}"; do
-        [ -z "${!arg}" ] && error_message="${error_message} ${arg}"
+        if [ -z "${!1+x}" ]; then
+            error_message="${error_message} ${arg} undefined"
+        elif [ -z "${!arg}" ]; then
+            error_message="${error_message} ${arg} empty"
+        fi
     done
     [ -n "${error_message}" ] \
         && error_message="missing required arguments:${error_message}" \
@@ -170,7 +148,6 @@ export -f debugVar
 export -f infoLog
 export -f infoVar
 export -f debugStack
-export -f infoStack
 export -f die
 export -f try
 export -f assign
